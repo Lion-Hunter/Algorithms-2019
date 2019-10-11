@@ -2,6 +2,11 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 
+import java.io.*;
+import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+
 @SuppressWarnings("unused")
 public class JavaTasks {
     /**
@@ -34,9 +39,7 @@ public class JavaTasks {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
-    static public void sortTimes(String inputName, String outputName) {
-        throw new NotImplementedError();
-    }
+    static public void sortTimes(String inputName, String outputName) { throw new NotImplementedError(); }
 
     /**
      * Сортировка адресов
@@ -98,9 +101,32 @@ public class JavaTasks {
      * 99.5
      * 121.3
      */
-    static public void sortTemperatures(String inputName, String outputName) {
-        throw new NotImplementedError();
-    }
+    static public void sortTemperatures(String inputName, String outputName) throws IOException {
+        int[] temps = new int[7731];
+
+        BufferedReader reader;
+        reader = new BufferedReader(new InputStreamReader
+                (new FileInputStream(inputName), StandardCharsets.UTF_8));
+        String str = reader.readLine();
+
+        while (str != null) {
+            temps[(int) (new Double(str) * 10.0) + 2730]++;
+            str = reader.readLine();
+        } //O(n): n - number of lines in input File
+        reader.close();
+
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter
+                (new FileOutputStream(outputName), StandardCharsets.UTF_8));
+
+        for (int i = 0; i < 7731; i++) {
+            if (temps[i] > 0) {
+                for (int j = 0; j < temps[i]; j++) {
+                    writer.write((double) (i - 2730)/10 + "\n");
+                }
+            }
+        } //O(t): because i = const, t <= n
+        writer.close();
+    } //Ресурсоемкость - О(1), трудоемкость - О(n)
 
     /**
      * Сортировка последовательности
@@ -131,9 +157,74 @@ public class JavaTasks {
      * 2
      * 2
      */
-    static public void sortSequence(String inputName, String outputName) {
-        throw new NotImplementedError();
+
+    public static class Pair {
+        private int key;
+        private int value;
+
+        Pair(int first, int second){
+            key = first;
+            value = second;
+        }
     }
+
+    static public void sortSequence(String inputName, String outputName) throws IOException {
+        ArrayList<Pair> list = new ArrayList<>();
+        ArrayList<Integer> numbers = new ArrayList<>();
+        ArrayList<Integer> answers = new ArrayList<>();
+
+        BufferedReader reader;
+        reader = new BufferedReader(new InputStreamReader
+                (new FileInputStream(inputName), StandardCharsets.UTF_8));
+        String str = reader.readLine();
+
+        int count = 0;
+        int maximal = 0;
+
+        while (str != null) {
+            numbers.add(new Integer(str));
+            for (Pair pair : list) {
+                if (pair.key == new Integer(str)) {
+                    pair.value++;
+                    if (pair.value > maximal) maximal = pair.value;
+                    count = 1;
+                }
+            } //O(i): i <= n - number of elements
+
+            if (count != 1) {
+                list.add(new Pair(new Integer(str), 1));
+            }
+
+            str = reader.readLine();
+        } //O(n^2): n - number of lines in input File
+        reader.close();
+        count = 0;
+
+        int min_number = Integer.MAX_VALUE;
+        for (Pair pair : list) {
+            if (pair.value == maximal && pair.key < min_number) {
+                min_number = pair.key;
+            }
+        } //O(i)
+
+        for (Integer number : numbers) {
+            if (number != min_number) {
+                answers.add(number);
+            } else count++;
+        } //O(n): number of elements in numbers equals n
+
+        while (count > 0) {
+            answers.add(min_number);
+            count--;
+        } //O(count) count <= n
+
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter
+                (new FileOutputStream(outputName), StandardCharsets.UTF_8));
+        for (Integer answer : answers) {
+            writer.write(Integer.toString(answer) + "\n");
+        } //O(k): k < = n - number of elements in answers
+        writer.close();
+    } // Ресурсоемкость O(n), трудоемкость O(n^2)
 
     /**
      * Соединить два отсортированных массива в один
@@ -150,6 +241,5 @@ public class JavaTasks {
      * Результат: second = [1 3 4 9 9 13 15 20 23 28]
      */
     static <T extends Comparable<T>> void mergeArrays(T[] first, T[] second) {
-        throw new NotImplementedError();
     }
 }
