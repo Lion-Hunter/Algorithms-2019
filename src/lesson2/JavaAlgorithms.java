@@ -3,6 +3,7 @@ package lesson2;
 import kotlin.NotImplementedError;
 import kotlin.Pair;
 
+import java.io.IOException;
 import java.util.Set;
 
 @SuppressWarnings("unused")
@@ -99,8 +100,27 @@ public class JavaAlgorithms {
      * Если имеется несколько самых длинных общих подстрок одной длины,
      * вернуть ту из них, которая встречается раньше в строке first.
      */
-    static public String longestCommonSubstring(String firs, String second) {
-        throw new NotImplementedError();
+    static public String longestCommonSubstring(String firs, String second) throws IOException {
+        int index = 0;
+        int max_length = 0;
+
+        for (int i = 0; i < firs.length() - 1; i++) {
+            int k = i + 1;
+            while (second.contains(firs.substring(i, k))) {
+                if (k < second.length() - 1 && k < firs.length() - 1) {
+                    k++;
+                } else break;
+            }
+
+            String sub1 = firs.substring(i, k - 1);
+            if (sub1.length() > max_length) {
+                max_length = sub1.length();
+                index = i;
+            }
+        }
+
+        if (max_length == 0) return "";
+                else return firs.substring(index, index + max_length);
     }
 
     /**
