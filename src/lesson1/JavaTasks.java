@@ -6,6 +6,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public class JavaTasks {
@@ -103,17 +104,19 @@ public class JavaTasks {
      */
     static public void sortTemperatures(String inputName, String outputName) throws IOException {
         int[] temps = new int[7731];
+        BufferedReader reader = new BufferedReader(new InputStreamReader
+                (new FileInputStream(inputName), StandardCharsets.UTF_8));;
 
-        BufferedReader reader;
-        reader = new BufferedReader(new InputStreamReader
-                (new FileInputStream(inputName), StandardCharsets.UTF_8));
-        String str = reader.readLine();
+        try {
+            String str = reader.readLine();
 
-        while (str != null) {
-            temps[(int) (new Double(str) * 10.0) + 2730]++;
-            str = reader.readLine();
-        } //O(n): n - number of lines in input File
-        reader.close();
+            while (str != null) {
+                temps[(int) (new Double(str) * 10.0) + 2730]++;
+                str = reader.readLine();
+            } //O(n): n - number of lines in input File
+        } catch (IOException e) {
+            reader.close();
+        }
 
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter
                 (new FileOutputStream(outputName), StandardCharsets.UTF_8));
@@ -126,6 +129,7 @@ public class JavaTasks {
             }
         } //O(t): because i = const, t <= n
         writer.close();
+
     } //Ресурсоемкость - О(1), трудоемкость - О(n)
 
     /**
@@ -171,34 +175,37 @@ public class JavaTasks {
     static public void sortSequence(String inputName, String outputName) throws IOException {
         ArrayList<Pair> list = new ArrayList<>();
         ArrayList<Integer> numbers = new ArrayList<>();
-        ArrayList<Integer> answers = new ArrayList<>();
-
-        BufferedReader reader;
-        reader = new BufferedReader(new InputStreamReader
-                (new FileInputStream(inputName), StandardCharsets.UTF_8));
-        String str = reader.readLine();
-
+        List<Integer> answers = new ArrayList<Integer>();
         int count = 0;
         int maximal = 0;
 
-        while (str != null) {
-            numbers.add(new Integer(str));
+        BufferedReader reader = new BufferedReader(new InputStreamReader
+                (new FileInputStream(inputName), StandardCharsets.UTF_8));
 
-            for (Pair pair : list) {
-                if (pair.key == new Integer(str)) {
-                    pair.value++;
-                    if (pair.value > maximal) maximal = pair.value;
-                    count = 1;
+        try {
+            String str = reader.readLine();
+
+            while (str != null) {
+                numbers.add(new Integer(str));
+
+                for (Pair pair : list) {
+                    if (pair.key == new Integer(str)) {
+                        pair.value++;
+                        if (pair.value > maximal) maximal = pair.value;
+                        count = 1;
+                    }
+                } //O(i): i <= n - number of elements
+
+                if (count != 1) {
+                    list.add(new Pair(new Integer(str), 1));
                 }
-            } //O(i): i <= n - number of elements
 
-            if (count != 1) {
-                list.add(new Pair(new Integer(str), 1));
-            }
+                str = reader.readLine();
+            } //O(n^2): n - number of lines in input File
+        } catch (IOException e) {
+            reader.close();
+        }
 
-            str = reader.readLine();
-        } //O(n^2): n - number of lines in input File
-        reader.close();
         count = 0;
 
         int min_number = Integer.MAX_VALUE;
@@ -225,6 +232,7 @@ public class JavaTasks {
             writer.write(Integer.toString(answer) + "\n");
         } //O(k): k < = n - number of elements in answers
         writer.close();
+
     } // Ресурсоемкость O(n), трудоемкость O(n^2)
 
     /**
