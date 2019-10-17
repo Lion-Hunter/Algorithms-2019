@@ -183,6 +183,7 @@ public class JavaTasks {
 
         while (str != null) {
             numbers.add(new Integer(str));
+
             for (Pair pair : list) {
                 if (pair.key == new Integer(str)) {
                     pair.value++;
