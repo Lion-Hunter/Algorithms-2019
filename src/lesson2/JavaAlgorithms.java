@@ -3,7 +3,9 @@ package lesson2;
 import kotlin.NotImplementedError;
 import kotlin.Pair;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Set;
 
 @SuppressWarnings("unused")
@@ -32,9 +34,43 @@ public class JavaAlgorithms {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
-    static public Pair<Integer, Integer> optimizeBuyAndSell(String inputName) {
-        throw new NotImplementedError();
-    }
+    static public Pair<Integer, Integer> optimizeBuyAndSell(String inputName) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader
+                (new FileInputStream(inputName), StandardCharsets.UTF_8));
+        String str = reader.readLine();
+        ArrayList<Integer> prices = new ArrayList<>();
+
+        while (str != null) {
+            if (new Integer(str) < 0) throw new IllegalArgumentException();
+            prices.add(new Integer(str));
+            str = reader.readLine();
+        } //O(n)
+
+        int[] delta = new int[prices.size() - 1];
+        for (int i = 1; i < prices.size(); i++) {
+            delta[i - 1] = prices.get(i) - prices.get(i - 1);
+        } //O(n)
+
+        int max = 0;
+        int curSum = 0;
+        int begin = 0;
+        int end = 0;
+        int maxBegin = 0;
+        for (int i = 0; i < delta.length; i++) {
+            curSum += delta[i];
+            if (curSum > max) {
+                max = curSum;
+                maxBegin = begin;
+                end = i;
+            }
+            if (curSum < 0) {
+                curSum = 0;
+                begin = i + 1;
+            }
+        } //O(n)
+
+        return (new Pair(maxBegin + 1, end + 2));
+    } //Ресурсоемкость O(n), трудоемкость O(n)
 
     /**
      * Задача Иосифа Флафия.
@@ -89,6 +125,7 @@ public class JavaAlgorithms {
         throw new NotImplementedError();
     }
 
+
     /**
      * Наибольшая общая подстрока.
      * Средняя
@@ -110,7 +147,7 @@ public class JavaAlgorithms {
                 if (k < second.length() - 1 && k < firs.length() - 1) {
                     k++;
                 } else break;
-            }
+            } //O(i*k), i = n = number of letters in string, k <= i - 1 => O(n^2)
 
             String sub1 = firs.substring(i, k - 1);
             if (sub1.length() > max_length) {
@@ -121,7 +158,7 @@ public class JavaAlgorithms {
 
         if (max_length == 0) return "";
                 else return firs.substring(index, index + max_length);
-    }
+    } //Ресурсоемкость O(1), трудоемкость O(n^2)
 
     /**
      * Число простых чисел в интервале
