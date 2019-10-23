@@ -181,7 +181,7 @@ public class JavaTasks {
             }
         } catch (IOException e){
             reader.close();
-        } //O(log(n)) n - number of strings in the input file
+        } //O(n*log(n)) n - number of strings in the input file
 
         int maxValue = 0;
         int minKey = 1;
@@ -211,7 +211,7 @@ public class JavaTasks {
             writer.write(minKey + "\n");
         } //O(n)
         writer.close();
-    } // Ресурсоемкость O(n), трудоемкость O(log(n))
+    } // Ресурсоемкость O(n), трудоемкость O(n*log(n))
 
     /**
      * Соединить два отсортированных массива в один
