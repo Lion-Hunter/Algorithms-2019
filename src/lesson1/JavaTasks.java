@@ -7,6 +7,8 @@ import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @SuppressWarnings("unused")
 public class JavaTasks {
@@ -162,78 +164,54 @@ public class JavaTasks {
      * 2
      */
 
-    public static class Pair {
-        private int key;
-        private int value;
-
-        Pair(int first, int second){
-            key = first;
-            value = second;
-        }
-    }
-
     static public void sortSequence(String inputName, String outputName) throws IOException {
-        ArrayList<Pair> list = new ArrayList<>();
-        ArrayList<Integer> numbers = new ArrayList<>();
-        List<Integer> answers = new ArrayList<Integer>();
-        int count = 0;
-        int maximal = 0;
-
+        TreeMap<Integer, Integer> tree = new TreeMap<>();
         BufferedReader reader = new BufferedReader(new InputStreamReader
                 (new FileInputStream(inputName), StandardCharsets.UTF_8));
+        ArrayList<Integer> list = new ArrayList<>();
+        ArrayList<Integer> result = new ArrayList<>();
+        String str = reader.readLine();
 
         try {
-            String str = reader.readLine();
-
             while (str != null) {
-                numbers.add(new Integer(str));
-
-                for (Pair pair : list) {
-                    if (pair.key == new Integer(str)) {
-                        pair.value++;
-                        if (pair.value > maximal) maximal = pair.value;
-                        count = 1;
-                    }
-                } //O(i): i <= n - number of elements
-
-                if (count != 1) {
-                    list.add(new Pair(new Integer(str), 1));
-                }
-
+                if (!tree.containsKey(new Integer(str))) tree.put(new Integer(str), 1);
+                else tree.put(new Integer(str), tree.get(new Integer(str)) + 1);
+                list.add(new Integer(str));
                 str = reader.readLine();
-            } //O(n^2): n - number of lines in input File
-        } catch (IOException e) {
-            reader.close();
-        }
-
-        count = 0;
-
-        int min_number = Integer.MAX_VALUE;
-        for (Pair pair : list) {
-            if (pair.value == maximal && pair.key < min_number) {
-                min_number = pair.key;
             }
-        } //O(i)
+        } catch (IOException e){
+            reader.close();
+        } //O(log(n)) n - number of strings in the input file
 
-        for (Integer number : numbers) {
-            if (number != min_number) {
-                answers.add(number);
-            } else count++;
-        } //O(n): number of elements in numbers equals n
+        int maxValue = 0;
+        int minKey = 1;
 
-        while (count > 0) {
-            answers.add(min_number);
-            count--;
-        } //O(count) count <= n
+        for (Integer key : tree.keySet()) {
+            if (tree.get(key) > maxValue) maxValue = tree.get(key);
+        } //O(m) = O(n), because m <= n
+
+        for (Integer e : tree.keySet()) {
+            if (tree.get(e) == maxValue) {
+                minKey = e;
+                break;
+            }
+        } //O(k) = O(n), k <= n
+
+        for (Integer number : list) {
+            if (number != minKey) result.add(number);
+        } //O(n)
 
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter
                 (new FileOutputStream(outputName), StandardCharsets.UTF_8));
-        for (Integer answer : answers) {
-            writer.write(Integer.toString(answer) + "\n");
-        } //O(k): k < = n - number of elements in answers
-        writer.close();
+        for (Integer r : result) {
+            writer.write(r + "\n");
+        } //O(n)
 
-    } // Ресурсоемкость O(n), трудоемкость O(n^2)
+        for (int i = 0; i < tree.get(minKey); i++) {
+            writer.write(minKey + "\n");
+        } //O(n)
+        writer.close();
+    } // Ресурсоемкость O(n), трудоемкость O(log(n))
 
     /**
      * Соединить два отсортированных массива в один
