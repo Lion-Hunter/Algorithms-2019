@@ -141,6 +141,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     }
 
     public Node<T> minLeaf(Node<T> node) {
+        if (node == null) return null;
         if (node.left == null) return node;
         else return minLeaf(node.left);
     }
@@ -194,18 +195,11 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     }
 
     public class BinaryTreeIterator implements Iterator<T> {
-        LinkedList<Node<T>> nodes = new LinkedList<>();
-        Node<T> curNode = null;
+        Node<T> lastNode;
+        Node<T> nextNode;
 
-        private BinaryTreeIterator(Node<T> node) {
-            addNode(node);
-        }
-
-        private void addNode(Node<T> node) {
-            while (node != null) {
-                nodes.addFirst(node);
-                node = node.left;
-            }
+        BinaryTreeIterator() {
+            nextNode = minLeaf(root);
         }
 
         /**
@@ -214,7 +208,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public boolean hasNext() {
-            return !nodes.isEmpty();
+            return nextNode != null;
         }
 
         /**
@@ -223,11 +217,18 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            curNode = nodes.getFirst();
+            lastNode = nextNode;
+            if (lastNode.right != null) {
+                nextNode = minLeaf(lastNode.right);
+            } else {
+                Node<T> temp;
+                do {
+                    temp = nextNode;
+                    nextNode = parent(nextNode);
+                } while (nextNode != null && temp != nextNode.left);
+            }
 
-            nodes.removeFirst();
-            addNode(curNode.right);
-            return curNode.value;
+            return lastNode.value;
         }
 
         /**
@@ -236,7 +237,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public void remove() {
-            removeElem(curNode);
+            removeElem(lastNode);
             size--;
         }
     }
@@ -244,7 +245,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public Iterator<T> iterator() {
-        return new BinaryTreeIterator(root);
+        return new BinaryTreeIterator();
     }
 
     @Override
