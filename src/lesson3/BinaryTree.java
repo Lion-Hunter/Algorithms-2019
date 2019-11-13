@@ -10,7 +10,7 @@ import java.util.*;
 public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
     private static class Node<T> {
-        final T value;
+        T value;
 
         Node<T> left = null;
 
@@ -74,8 +74,95 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      */
     @Override
     public boolean remove(Object o) {
-        // TODO
-        throw new NotImplementedError();
+        T value = (T) o;
+        Node<T> elem = find(value);
+        size--;
+        return removeElem(elem);
+    }
+
+    public boolean removeElem(Node node) {
+        if (node == null) return false;
+        Node<T> parent = parent(node);
+
+        if (parent == null) {
+            if (node.left == null) {
+                if (node.right == null) {
+                    root = null;
+                }
+                else {
+                    root = node.right;
+                }
+            } else {
+                if (node.right == null) {
+                    root = node.left;
+                } else {
+                    Node minLeaf = minLeaf(node.right);
+
+                    Node newNode = new Node(minLeaf.value);
+                    newNode.left = node.left;
+                    newNode.right = node.right;
+                    root = newNode;
+                    removeElem(minLeaf);
+                }
+            }
+        } else {
+            if (node.left == null) {
+                if (node.right == null) {
+                    if (parent.left == node) parent.left = null;
+                    else parent.right = null;
+                }
+                else {
+                    Node newNode = new Node(node.right.value);
+                    if (node.right.left != null) newNode.left = node.right.left;
+                    if (node.right.right != null) newNode.right = node.right.right;
+                    if (parent.left == node) parent.left = newNode;
+                    else parent.right = newNode;
+                }
+            } else {
+                if (node.right == null) {
+                    Node newNode = new Node(node.left.value);
+                    if (node.left.left != null) newNode.left = node.left.left;
+                    if (node.left.right != null) newNode.right = node.left.right;
+                    if (parent.left == node) parent.left = newNode;
+                    else parent.right = newNode;
+                } else {
+                    Node minLeaf = minLeaf(node.right);
+                    removeElem(minLeaf);
+                    Node newNode = new Node(minLeaf.value);
+                    newNode.left = node.left;
+                    newNode.right = node.right;
+                    if (parent.left == node) parent.left = newNode;
+                    else parent.right = newNode;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public Node<T> minLeaf(Node<T> node) {
+        if (node.left == null) return node;
+        else return minLeaf(node.left);
+    }
+
+    public Node<T> parent(Node<T> node) {
+        if (root == null || root == node) return null;
+        return parent(root, node.value);
+    }
+
+    private Node<T> parent(Node<T> start, T value) {
+        if (start.left != null && start.left.value == value) return start;
+        if (start.right != null && start.right.value == value) return start;
+
+        int comparison = value.compareTo(start.value);
+        if (comparison < 0) {
+            assert start.left != null;
+            return parent(start.left, value);
+        }
+        else {
+            assert start.right != null;
+            return parent(start.right, value);
+        }
     }
 
     @Override
@@ -107,9 +194,18 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     }
 
     public class BinaryTreeIterator implements Iterator<T> {
+        LinkedList<Node<T>> nodes = new LinkedList<>();
+        Node<T> curNode = null;
 
-        private BinaryTreeIterator() {
-            // Добавьте сюда инициализацию, если она необходима
+        private BinaryTreeIterator(Node<T> node) {
+            addNode(node);
+        }
+
+        private void addNode(Node<T> node) {
+            while (node != null) {
+                nodes.addFirst(node);
+                node = node.left;
+            }
         }
 
         /**
@@ -118,8 +214,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public boolean hasNext() {
-            // TODO
-            throw new NotImplementedError();
+            return !nodes.isEmpty();
         }
 
         /**
@@ -128,8 +223,11 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            // TODO
-            throw new NotImplementedError();
+            curNode = nodes.getFirst();
+
+            nodes.removeFirst();
+            addNode(curNode.right);
+            return curNode.value;
         }
 
         /**
@@ -138,15 +236,15 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public void remove() {
-            // TODO
-            throw new NotImplementedError();
+            removeElem(curNode);
+            size--;
         }
     }
 
     @NotNull
     @Override
     public Iterator<T> iterator() {
-        return new BinaryTreeIterator();
+        return new BinaryTreeIterator(root);
     }
 
     @Override
