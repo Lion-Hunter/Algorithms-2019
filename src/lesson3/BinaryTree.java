@@ -218,6 +218,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         @Override
         public T next() {
             lastNode = nextNode;
+
             if (lastNode.right != null) {
                 nextNode = minLeaf(lastNode.right);
             } else {
