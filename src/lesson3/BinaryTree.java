@@ -4,6 +4,7 @@ import kotlin.NotImplementedError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.*;
 
 // Attention: comparable supported but comparator is not
@@ -18,6 +19,12 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
         Node(T value) {
             this.value = value;
+        }
+
+        Node(Node<T> node) {
+            this.value = node.value;
+            this.left = node.left;
+            this.right = node.right;
         }
     }
 
@@ -71,6 +78,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     /**
      * Удаление элемента в дереве
      * Средняя
+     *
+     * Трудоемкость O(n), ресурсоемкость O(1), n - высота дерева
      */
     @Override
     public boolean remove(Object o) {
@@ -80,7 +89,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         return removeElem(elem);
     }
 
-    public boolean removeElem(Node node) {
+    private boolean removeElem(Node node) {
         if (node == null) return false;
         Node<T> parent = parent(node);
 
@@ -96,13 +105,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
                 if (node.right == null) {
                     root = node.left;
                 } else {
-                    Node minLeaf = minLeaf(node.right);
-
-                    Node newNode = new Node(minLeaf.value);
-                    newNode.left = node.left;
-                    newNode.right = node.right;
-                    root = newNode;
-                    removeElem(minLeaf);
+                    replace(node, null);
                 }
             }
         } else {
@@ -112,27 +115,15 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
                     else parent.right = null;
                 }
                 else {
-                    Node newNode = new Node(node.right.value);
-                    if (node.right.left != null) newNode.left = node.right.left;
-                    if (node.right.right != null) newNode.right = node.right.right;
-                    if (parent.left == node) parent.left = newNode;
-                    else parent.right = newNode;
+                    if (parent.left == node) parent.left = node.right;
+                    else parent.right = node.right;
                 }
             } else {
                 if (node.right == null) {
-                    Node newNode = new Node(node.left.value);
-                    if (node.left.left != null) newNode.left = node.left.left;
-                    if (node.left.right != null) newNode.right = node.left.right;
-                    if (parent.left == node) parent.left = newNode;
-                    else parent.right = newNode;
+                    if (parent.left == node) parent.left = node.left;
+                    else parent.right = node.left;
                 } else {
-                    Node minLeaf = minLeaf(node.right);
-                    removeElem(minLeaf);
-                    Node newNode = new Node(minLeaf.value);
-                    newNode.left = node.left;
-                    newNode.right = node.right;
-                    if (parent.left == node) parent.left = newNode;
-                    else parent.right = newNode;
+                    replace(node, parent);
                 }
             }
         }
@@ -140,16 +131,33 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         return true;
     }
 
+    private void replace(Node<T> node, Node<T> parent) {
+        Node minLeaf = minLeaf(node.right);
+
+        removeElem(minLeaf);
+        Node newNode = new Node(minLeaf.value);
+        newNode.left = node.left;
+        newNode.right = node.right;
+
+        if (parent(node) == null) {
+            root = newNode;
+        } else {
+            if (parent.left == node) parent.left = newNode;
+            else parent.right = newNode;
+        }
+    } //Трудоемкость О(n), ресурсоемкость O(1) n - высота дерева
+
+
     public Node<T> minLeaf(Node<T> node) {
         if (node == null) return null;
         if (node.left == null) return node;
         else return minLeaf(node.left);
-    }
+    } //Трудоемкость О(n), ресурсоемкость O(1) n - высота дерева
 
     public Node<T> parent(Node<T> node) {
         if (root == null || root == node) return null;
         return parent(root, node.value);
-    }
+}
 
     private Node<T> parent(Node<T> start, T value) {
         if (start.left != null && start.left.value == value) return start;
@@ -157,14 +165,18 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
         int comparison = value.compareTo(start.value);
         if (comparison < 0) {
-            assert start.left != null;
-            return parent(start.left, value);
+            if (start.left != null) {
+                return parent(start.left, value);
+            }
         }
         else {
-            assert start.right != null;
-            return parent(start.right, value);
+            if (start.right != null) {
+                return parent(start.right, value);
+            }
         }
-    }
+
+        return null;
+    }//Трудоемкость О(n), ресурсоемкость O(1) n - высота дерева
 
     @Override
     public boolean contains(Object o) {
@@ -195,6 +207,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     }
 
     public class BinaryTreeIterator implements Iterator<T> {
+        Node<T> locRoot = root;
         Node<T> lastNode;
         Node<T> nextNode;
 
@@ -205,6 +218,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         /**
          * Проверка наличия следующего элемента
          * Средняя
+         *
+         * Трудоемкость О(1), ресурсоемкость O(1)
          */
         @Override
         public boolean hasNext() {
@@ -214,13 +229,17 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         /**
          * Поиск следующего элемента
          * Средняя
+         *
+         * Трудоемкость О(n), ресурсоемкость O(1), n - высота дерева
          */
         @Override
         public T next() {
-            lastNode = nextNode;
+            if (!hasNext()) throw new IllegalArgumentException();
 
-            if (lastNode.right != null) {
-                nextNode = minLeaf(lastNode.right);
+            lastNode = new Node<T>(nextNode);
+
+            if (nextNode.right != null) {
+                nextNode = minLeaf(nextNode.right);
             } else {
                 Node<T> temp;
                 do {
@@ -235,11 +254,17 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         /**
          * Удаление следующего элемента
          * Сложная
+         *
+         * Трудоемкость О(n), ресурсоемкость O(1), n - высота дерева
          */
         @Override
         public void remove() {
-            removeElem(lastNode);
-            size--;
+            if (lastNode == null) throw new IllegalArgumentException();
+
+            BinaryTree.this.remove(lastNode.value);
+            if (nextNode != null) {
+                nextNode = find(nextNode.value);
+            }
         }
     }
 
