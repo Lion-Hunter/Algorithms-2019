@@ -234,7 +234,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            if (!hasNext()) throw new IllegalArgumentException();
+            if (!hasNext()) throw new IllegalStateException();
 
             lastNode = new Node<T>(nextNode);
 
@@ -259,7 +259,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public void remove() {
-            if (lastNode == null) throw new IllegalArgumentException();
+            if (lastNode == null) throw new IllegalStateException();
 
             BinaryTree.this.remove(lastNode.value);
             if (nextNode != null) {

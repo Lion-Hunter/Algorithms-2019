@@ -4,11 +4,8 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.assertThrows
-import kotlin.test.Test
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class BinaryTreeTest {
     private fun testAdd(create: () -> CheckableSortedSet<Int>) {
@@ -117,6 +114,13 @@ class BinaryTreeTest {
             val treeIt = treeSet.iterator()
             val binaryIt = binarySet.iterator()
             println("Traversing $list")
+
+            if (!binaryIt.hasNext()) {
+                assertFailsWith<IllegalStateException>("no element in iterator") {
+                    binaryIt.next()
+                }
+            }
+
             while (treeIt.hasNext()) {
                 assertEquals(treeIt.next(), binaryIt.next(), "Incorrect iterator state while iterating $treeSet")
             }
@@ -163,6 +167,11 @@ class BinaryTreeTest {
             println("Removing $toRemove from $list")
             val iterator = binarySet.iterator()
             var counter = binarySet.size
+
+            assertFailsWith<IllegalStateException>("can't delete from empty iterator") {
+                iterator.remove()
+            }
+
             while (iterator.hasNext()) {
                 val element = iterator.next()
                 counter--
