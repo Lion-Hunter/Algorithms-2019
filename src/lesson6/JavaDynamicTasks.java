@@ -2,6 +2,9 @@ package lesson6;
 
 import kotlin.NotImplementedError;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -19,7 +22,44 @@ public class JavaDynamicTasks {
      * При сравнении подстрок, регистр символов *имеет* значение.
      */
     public static String longestCommonSubSequence(String first, String second) {
-        throw new NotImplementedError();
+        int k = first.length();
+        int l = second.length();
+        StringBuffer result = new StringBuffer();
+
+        if (l == 0 || k == 0) return "";
+
+        char[] x = first.toCharArray();
+        char[] y = second.toCharArray();
+
+        int[][] lcs = new int[k + 1][l + 1];
+
+        for (int i = 0; i <= k; i++) { lcs[i][0] = 0; }
+        for (int j = 1; j <= l; j++) { lcs[0][j] = 0; }
+
+        for (int i = 1; i <= k; i++) {
+            for (int j = 1; j <= l; j++) {
+                if (x[i - 1] == y[j - 1]) {
+                    lcs[i][j] = lcs[i - 1][j - 1] + 1;
+                } else {
+                    lcs[i][j] = Math.max(lcs[i - 1][j], lcs[i][j - 1]);
+                }
+            }
+        }
+
+        writeLCS(k, l, x, lcs, result);
+        return result.toString();
+    }
+
+    private static void writeLCS(int i, int j, char[] x, int[][] lcs, StringBuffer result) {
+        if (i == 0 || j == 0) return;
+        if (lcs[i][j] == lcs[i - 1][j - 1] + 1
+                && lcs[i][j] != lcs[i - 1][j] && lcs[i][j] != lcs[i][j- 1]) {
+            result.insert(0, x[i - 1]);
+            writeLCS(i - 1, j -1, x, lcs, result);
+        } else {
+            if (lcs[i - 1][j] > lcs[i][j - 1]) writeLCS(i - 1, j, x, lcs, result);
+            else writeLCS(i, j - 1, x, lcs, result);
+        }
     }
 
     /**
@@ -58,8 +98,48 @@ public class JavaDynamicTasks {
      *
      * Здесь ответ 2 + 3 + 4 + 1 + 2 = 12
      */
-    public static int shortestPathOnField(String inputName) {
-        throw new NotImplementedError();
+    public static int shortestPathOnField(String inputName) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader
+                (new FileInputStream(inputName), StandardCharsets.UTF_8));
+        String str = reader.readLine();
+        if (str.matches("[^ 0-9]")) throw new IllegalArgumentException();
+
+        List<Integer> lastStr = new ArrayList<>();
+        List<Integer> currStr = new ArrayList<>();
+
+        while (str != null) {
+            if (str.matches("[^ 0-9]")) throw new IllegalArgumentException();
+
+            for (int i = 0; i < str.split(" +").length; i++) {
+                if (currStr.size() <= i) { currStr.add(new Integer(str.split(" +")[i])); }
+                else { currStr.set(i, new Integer(str.split(" +")[i])); }
+            }
+
+            int minNeighbour;
+
+            for (int i = 0; i < currStr.size(); i++) {
+                minNeighbour = 0;
+
+                if (i > 0 && lastStr.isEmpty()) minNeighbour = currStr.get(i - 1);
+                else if (!lastStr.isEmpty() && i == 0) minNeighbour = lastStr.get(i);
+                else if (i > 0) {
+                    minNeighbour = currStr.get(i - 1);
+                    minNeighbour = Math.min(lastStr.get(i), minNeighbour);
+                    minNeighbour = Math.min(lastStr.get(i - 1), minNeighbour);
+                }
+
+                currStr.set(i, minNeighbour + currStr.get(i));
+            }
+
+            for (int i = 0; i < currStr.size(); i++) {
+                if (lastStr.size() <= i) { lastStr.add(currStr.get(i)); }
+                else lastStr.set(i, currStr.get(i));
+            }
+
+            str = reader.readLine();
+        }
+
+        return lastStr.get(lastStr.size() - 1);
     }
 
     // Задачу "Максимальное независимое множество вершин в графе без циклов"
