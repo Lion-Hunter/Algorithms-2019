@@ -44,11 +44,11 @@ public class JavaDynamicTasks {
                     lcs[i][j] = Math.max(lcs[i - 1][j], lcs[i][j - 1]);
                 }
             }
-        }
+        } //O(n^2)
 
         writeLCS(k, l, x, lcs, result);
         return result.toString();
-    }
+    } //сложность O(n^2) , ресурсоемкость O(n*m) = O(n^2) где n, m - длины строк
 
     private static void writeLCS(int i, int j, char[] x, int[][] lcs, StringBuffer result) {
         if (i == 0 || j == 0) return;
@@ -60,7 +60,7 @@ public class JavaDynamicTasks {
             if (lcs[i - 1][j] > lcs[i][j - 1]) writeLCS(i - 1, j, x, lcs, result);
             else writeLCS(i, j - 1, x, lcs, result);
         }
-    }
+    } //O(n)
 
     /**
      * Наибольшая возрастающая подпоследовательность
@@ -140,7 +140,7 @@ public class JavaDynamicTasks {
         }
 
         return lastStr.get(lastStr.size() - 1);
-    }
+    } //Трудоемкость O(n^2), ресурсоемкость O(n), где n - длина строк
 
     // Задачу "Максимальное независимое множество вершин в графе без циклов"
     // смотрите в уроке 5
