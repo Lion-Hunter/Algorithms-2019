@@ -110,7 +110,8 @@ public class JavaDynamicTasks {
         while (str != null) {
             if (str.matches("[^ 0-9]")) throw new IllegalArgumentException();
 
-            for (int i = 0; i < str.split(" +").length; i++) {
+            int length = str.split(" +").length;
+            for (int i = 0; i < length; i++) {
                 if (currStr.size() <= i) { currStr.add(new Integer(str.split(" +")[i])); }
                 else { currStr.set(i, new Integer(str.split(" +")[i])); }
             }
